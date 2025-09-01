@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Time Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0c10;
+            color: #d8d8d8;
+            transition: background-color 0.5s ease;
+        }
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .time-machine {
+            background: #1f2937;
+            border-radius: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            padding: 3rem;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .time-machine.shake {
+            animation: shake 0.2s infinite;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .digital-display {
+            background-color: #111827;
+            color: #38a169;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 0.2rem;
+            margin-bottom: 2rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+        }
+        .go-button, .stop-button, .explore-button {
+            transition: all 0.3s ease;
+        }
+        .go-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        .go-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .stop-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(248, 113, 113, 0.4);
+        }
+        .stop-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .modal-content {
+            background: #1f2937;
+            color: #d8d8d8;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        .timeline-modal-content {
+            max-width: 900px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        .timeline-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #38a169;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -13px;
+            background-color: #1f2937;
+            border: 4px solid #38a169;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .left {
+            left: 0;
+        }
+        .right {
+            left: 50%;
+        }
+        .left::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            right: 30px;
+            border: medium solid #1f2937;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent #1f2937;
+        }
+        .right::before {
+            content: " ";
+            height: 0;
+            position: absolute;
+            top: 22px;
+            width: 0;
+            z-index: 1;
+            left: 30px;
+            border: medium solid #1f2937;
+            border-width: 10px 10px 10px 0;
+            border-color: transparent #1f2937 transparent transparent;
+        }
+        .right::after {
+            left: -13px;
+        }
+        .timeline-content {
+            padding: 20px 30px;
+            position: relative;
+            border-radius: 6px;
+            transition: background-color 0.5s ease;
+        }
+        @media screen and (max-width: 600px) {
+            .timeline-container::after {
+                left: 31px;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-item::before {
+                left: 60px;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent #1f2937 transparent transparent;
+            }
+            .left::after, .right::after {
+                left: 18px;
+            }
+            .right {
+                left: 0%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="container">
+        <!-- Main Time Machine Interface -->
+        <div class="time-machine">
+            <h1 class="text-4xl font-bold mb-2">Cosmic Time Machine</h1>
+            <p class="text-gray-400 mb-6">Press 'GO' to travel to a random cosmic event!</p>
+            
+            <!-- Digital Display -->
+            <div id="yearDisplay" class="digital-display mb-8">
+                2025
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex justify-center space-x-4">
+                <button id="goButton" class="go-button bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">
+                    GO
+                </button>
+                <button id="stopButton" class="stop-button bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300" disabled>
+                    STOP
+                </button>
+            </div>
+            
+            <!-- New Explore button -->
+            <button id="exploreButton" class="explore-button mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 hidden">
+                Explore
+            </button>
+        </div>
+
+        <!-- Postcards Section -->
+        <div id="postcardsSection" class="mt-8 bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-6xl">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-4 sm:space-y-0">
+                <h2 class="text-3xl font-bold">Postcards from the Cosmos</h2>
+                <div class="flex items-center space-x-4">
+                    <div id="discoveryInfo" class="flex items-center space-x-4">
+                        <span id="levelDisplay" class="text-lg font-semibold text-blue-400">Level: One</span>
+                        <button id="discoveriesButton" class="go-button bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300">
+                            Discoveries
+                        </button>
+                    </div>
+                    <button id="resetButton" class="go-button bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full transition duration-300">
+                        Reset
+                    </button>
+                    <!-- New Timeline button -->
+                    <button id="timelineButton" class="go-button bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 hidden">
+                        Timeline
+                    </button>
+                </div>
+            </div>
+            <div id="postcardsContainer" class="flex flex-wrap gap-4 justify-center">
+                <p id="noPostcards" class="text-gray-400 italic">No journeys yet. Press 'GO' to collect your first postcard!</p>
+            </div>
+        </div>
+
+        <!-- Modal for Event Details -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="modalTitle" class="text-2xl font-bold mb-2"></h3>
+                <p id="modalEvent" class="text-lg text-gray-200 mb-4"></p>
+                <p id="modalWho" class="text-sm text-gray-400 mb-1"></p>
+                <p id="modalWhen" class="text-sm text-gray-400"></p>
+                <p id="modalWhere" class="text-sm text-gray-400"></p>
+                <p id="modalTheme" class="text-sm text-gray-400 mt-2 font-bold"></p>
+                <div class="mt-4 border-t border-gray-600 pt-4">
+                    <button id="moreDetailsBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 w-full mb-2">
+                        See More Details
+                    </button>
+                    <div id="additionalDetails" class="hidden text-sm text-gray-300 p-2 rounded-lg bg-gray-700"></div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="closeModal" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="modal hidden">
+            <div class="modal-content text-center">
+                <h3 class="text-2xl font-bold mb-4 text-red-400">Are you sure?</h3>
+                <p class="text-lg mb-6">This will permanently clear all of your collected postcards.</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="confirmResetButton" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full transition duration-300">
+                        Yes, Reset
+                    </button>
+                    <button id="cancelResetButton" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-full transition duration-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Timeline Modal -->
+        <div id="timelineModal" class="modal hidden">
+            <div class="modal-content timeline-modal-content max-w-4xl w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-green-400">Cosmic Timeline</h3>
+                    <button id="closeTimeline" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                        Close
+                    </button>
+                </div>
+                <div id="timelineContainer" class="timeline-container">
+                    <!-- Timeline items will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Discoveries Modal -->
+        <div id="discoveriesModal" class="modal hidden">
+            <div class="modal-content">
+                <h3 class="text-2xl font-bold mb-4">Your Discoveries</h3>
+                <p id="totalDiscoveries" class="text-lg mb-4"></p>
+                <div id="themeCounters" class="space-y-2"></div>
+                <div class="flex justify-end mt-4">
+                    <button id="closeDiscoveries" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const themes = {
+            'Planetary Science': { name: 'Planetary Science', color: 'bg-amber-800' },
+            'Astronauts & Missions': { name: 'Astronauts & Missions', color: 'bg-sky-800' },
+            'Telescopes & Observation': { name: 'Telescopes & Observation', color: 'bg-emerald-800' },
+            'Cosmology & Physics': { name: 'Cosmology & Physics', color: 'bg-violet-800' },
+            'Celestial Mechanics': { name: 'Celestial Mechanics', color: 'bg-cyan-800' },
+            'Space Exploration': { name: 'Space Exploration', color: 'bg-fuchsia-800' },
+        };
+
+        const events = [
+            { year: -1000, title: 'Babylonian Astronomy', who: 'Babylonian Astronomers', description: 'Developed methods for predicting planetary positions and eclipses, creating the earliest known astronomical tables.', additionalDetails: 'The Babylonians used a zodiac-based system to track planetary movements and created sophisticated mathematical models to predict celestial events with great accuracy.', country: 'Babylonia', flag: '🇮🇶', theme: 'Celestial Mechanics' },
+            { year: -400, title: 'Moon Reflects Light', who: 'Anaxagoras', description: 'Proposed that the Moon does not produce its own light but instead reflects the light of the Sun.', additionalDetails: 'This was a significant early insight into the nature of celestial bodies, challenging previous notions that the moon was a celestial being with its own light source.', country: 'Greece', flag: '🇬🇷', theme: 'Celestial Mechanics' },
+            { year: -300, title: 'Early Heliocentric Model', who: 'Aristarchus of Samos', description: 'First proposed a heliocentric model of the solar system, placing the Sun at the center.', additionalDetails: 'His theories were not widely accepted at the time due to the influence of Aristotle and other geocentric thinkers, but his work was an important precursor to Copernicus.', country: 'Greece', flag: '🇬🇷', theme: 'Celestial Mechanics' },
+            { year: -200, title: 'Geocentric Model', who: 'Ptolemy', description: 'Proposed a detailed model of the universe with Earth at its center, which was the dominant view for over 1,400 years.', additionalDetails: 'Ptolemy\'s model, described in his book "Almagest," used epicycles and deferents to explain the apparent retrograde motion of planets, providing a complex but functional framework.', country: 'Roman Egypt', flag: '🇪🇬', theme: 'Celestial Mechanics' },
+            { year: 1543, title: 'Heliocentric Model', who: 'Nicolaus Copernicus', description: 'Published his theory that the Sun, not the Earth, is the center of the solar system, revolutionizing astronomy.', additionalDetails: 'Copernicus\'s work, "On the Revolutions of the Heavenly Spheres," was published shortly before his death. It laid the foundation for modern astronomy and was the start of the "Copernican Revolution."', country: 'Poland', flag: '🇵🇱', theme: 'Celestial Mechanics' },
+            { year: 1572, title: 'Tycho\'s Supernova', who: 'Tycho Brahe', description: 'Observed a supernova, which he showed to be beyond the Moon and stars, challenging the ancient belief in an unchanging celestial sphere.', additionalDetails: 'His detailed observations, made without a telescope, helped to prove that the heavens were not static and could change. This was a critical step in the scientific revolution.', country: 'Denmark', flag: '🇩🇰', theme: 'Telescopes & Observation' },
+            { year: 1608, title: 'Invention of the Telescope', who: 'Hans Lippershey', description: 'Credited with inventing the first refracting telescope, a device that would soon revolutionize astronomy.', additionalDetails: 'Although Galileo improved upon the design and used it for astronomical observation, Lippershey\'s patent application marks the beginning of modern telescopic astronomy.', country: 'Netherlands', flag: '🇳🇱', theme: 'Telescopes & Observation' },
+            { year: 1609, title: 'Laws of Planetary Motion', who: 'Johannes Kepler', description: 'Published his first two laws of planetary motion, describing elliptical orbits and the law of equal areas.', additionalDetails: 'Kepler\'s laws were a significant break from the ancient belief in perfectly circular orbits. They provided the mathematical framework for understanding planetary motion and later inspired Isaac Newton\'s law of universal gravitation.', country: 'Germany', flag: '🇩🇪', theme: 'Celestial Mechanics' },
+            { year: 1610, title: 'Galileo\'s Observations', who: 'Galileo Galilei', description: 'Using a telescope, he discovered Jupiter\'s four largest moons, phases of Venus, and sunspots, providing strong evidence for the heliocentric model.', additionalDetails: 'His observations were revolutionary and controversial. The discovery of moons orbiting Jupiter proved that not everything in the universe revolved around the Earth.', country: 'Italy', flag: '🇮🇹', theme: 'Telescopes & Observation' },
+            { year: 1655, title: 'Discovery of Titan', who: 'Christiaan Huygens', description: 'Discovered Saturn\'s largest moon, Titan, and correctly identified the nature of Saturn\'s rings as a solid, flat disc.', additionalDetails: 'Galileo had previously observed Saturn\'s rings but described them as "ears." Huygens\'s improved telescope and careful observation led him to the correct conclusion.', country: 'Netherlands', flag: '🇳🇱', theme: 'Planetary Science' },
+            { year: 1687, title: 'Law of Universal Gravitation', who: 'Isaac Newton', description: 'Published his "Principia Mathematica," which described the law of universal gravitation and the three laws of motion, unifying terrestrial and celestial mechanics.', additionalDetails: 'Newton\'s law states that every particle attracts every other particle with a force that is proportional to the product of their masses and inversely proportional to the square of the distance between them: $F = G\frac{m_1 m_2}{r^2}$.', country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', theme: 'Celestial Mechanics' },
+            { year: 1781, title: 'Discovery of Uranus', who: 'William Herschel', description: 'While conducting a sky survey, he discovered the planet Uranus, the first planet discovered using a telescope.', additionalDetails: 'Herschel initially thought he had found a comet, but its slow, planetary-like motion confirmed it was a new planet. This discovery doubled the known size of the solar system.', country: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', theme: 'Telescopes & Observation' },
+            { year: 1846, title: 'Discovery of Neptune', who: 'Urbain Le Verrier & John Couch Adams', description: 'Discovered the planet Neptune through mathematical calculations of the gravitational perturbations on Uranus.', additionalDetails: 'This was a monumental moment in science as it proved that planets could be discovered through mathematical prediction before being seen through a telescope.', country: 'France & England', flag: '🇫🇷🏴󠁧󠁢󠁥󠁮󠁧󠁿', theme: 'Planetary Science' },
+            { year: 1905, title: 'Theory of Relativity', who: 'Albert Einstein', description: 'Proposed the Special Theory of Relativity, leading to the famous equation $E = mc^2$, which explains the relationship between mass and energy.', additionalDetails: 'This work fundamentally changed our understanding of space and time. A decade later, he published the General Theory of Relativity, which described gravity as a curvature of spacetime.', country: 'Germany', flag: '🇩🇪', theme: 'Cosmology & Physics' },
+            { year: 1929, title: 'Expanding Universe', who: 'Edwin Hubble', description: 'Observed that galaxies are moving away from each other, providing the first observational evidence for an expanding universe.', additionalDetails: 'Hubble\'s law, $v = H_0 D$, states that the recessional velocity of a galaxy is proportional to its distance from the observer. This was a monumental discovery that laid the groundwork for the Big Bang Theory.', country: 'USA', flag: '🇺🇸', theme: 'Cosmology & Physics' },
+            { year: 1930, title: 'Discovery of Pluto', who: 'Clyde Tombaugh', description: 'Discovered Pluto, which was considered the ninth planet in our solar system for over 70 years.', additionalDetails: 'Tombaugh found Pluto while working at the Lowell Observatory by systematically comparing photographic plates of the sky in a laborious search for "Planet X."', country: 'USA', flag: '🇺🇸', theme: 'Planetary Science' },
+            { year: 1957, title: 'Sputnik 1', who: 'Soviet Union', description: 'Launched the first artificial Earth satellite, marking the beginning of the Space Age.', additionalDetails: 'Sputnik\'s launch sent a shockwave around the world and spurred the space race between the US and the Soviet Union. It was a simple sphere with a radio transmitter, but its success was a monumental achievement.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Astronauts & Missions' },
+            { year: 1958, title: 'Explorer 1 & Van Allen Belts', who: 'USA', description: 'Launched the first U.S. satellite, which led to the discovery of the Van Allen radiation belts surrounding Earth.', additionalDetails: 'The discovery of these belts was one of the first major scientific findings of the Space Age. They consist of charged particles held in place by Earth\'s magnetic field.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 1959, title: 'Luna 2 First Lunar Impact', who: 'Soviet Union', description: 'Launched the first spacecraft to successfully reach the surface of the Moon, impacting near the Sea of Serenity.', additionalDetails: 'Luna 2 was a sphere-shaped probe that carried Soviet pennants and scientific instruments. Its successful impact demonstrated the Soviet Union\'s advanced capabilities in space exploration.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Space Exploration' },
+            { year: 1961, title: 'First Human in Space', who: 'Yuri Gagarin', description: 'Became the first human to journey into outer space, completing a single orbit of the Earth aboard the Vostok 1 spacecraft.', additionalDetails: 'His famous words during the flight were, "Poyekhali!" (Let\'s go!). He was a national hero in the Soviet Union and a symbol of human ambition.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Astronauts & Missions' },
+            { year: 1961, title: 'First Woman in Space', who: 'Valentina Tereshkova', description: 'Became the first woman to fly in space, completing 48 orbits of the Earth aboard the Vostok 6 spacecraft.', additionalDetails: 'Her historic solo flight in 1963 was a significant milestone for the Soviet space program and remains a powerful symbol of women in space exploration.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Astronauts & Missions' },
+            { year: 1965, title: 'First Spacewalk', who: 'Alexei Leonov', description: 'Conducted the first spacewalk, exiting his Voskhod 2 capsule and floating in space for 12 minutes.', additionalDetails: 'The spacewalk was a dangerous and challenging feat, with his spacesuit expanding and making it difficult for him to re-enter the capsule.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Astronauts & Missions' },
+            { year: 1966, title: 'First Soft Landing on Moon', who: 'Soviet Union', description: 'The Luna 9 probe successfully performed the first soft landing on the Moon, transmitting panoramic photos from the surface.', additionalDetails: 'This was a major achievement in the space race, proving that a controlled landing on a celestial body was possible and providing the first look at the lunar surface from the ground.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Space Exploration' },
+            { year: 1968, title: 'First Crewed Lunar Orbit', who: 'NASA (Apollo 8)', description: 'The first crewed mission to travel beyond Earth orbit, reaching and orbiting the Moon.', additionalDetails: 'The mission was a crucial step toward the Apollo 11 moon landing. The crew took the iconic "Earthrise" photo, which has become a symbol of the environmental movement.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 1969, title: 'Apollo 11 Moon Landing', who: 'Neil Armstrong & Buzz Aldrin', description: 'The first humans to walk on the Moon, a historic event watched by millions around the world.', additionalDetails: 'Armstrong\'s famous quote, "That\'s one small step for man, one giant leap for mankind," captured the significance of the event. It was the culmination of the US\'s decade-long Apollo program.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 1971, title: 'First Mars Orbiter', who: 'NASA (Mariner 9)', description: 'Became the first spacecraft to orbit another planet, providing unprecedented images of Mars.', additionalDetails: 'Mariner 9 arrived during a planet-wide dust storm, but once the storm cleared, it was able to map the entire Martian surface and provide detailed images of its volcanoes and canyons.', country: 'USA', flag: '🇺🇸', theme: 'Planetary Science' },
+            { year: 1971, title: 'First Space Station', who: 'Soviet Union (Salyut 1)', description: 'Launched the first space station, Salyut 1, to conduct long-term scientific research in orbit.', additionalDetails: 'Salyut 1 paved the way for future space stations like Skylab and the International Space Station, proving the feasibility of extended human presence in space.', country: 'Soviet Union', flag: '🇷🇺', theme: 'Space Exploration' },
+            { year: 1973, title: 'Pioneer 10 to Jupiter', who: 'NASA', description: 'First spacecraft to travel through the asteroid belt and reach Jupiter, sending back detailed images of the planet.', additionalDetails: 'Pioneer 10\'s successful journey through the asteroid belt proved it was safe for future missions. It was also the first to travel into the outer solar system.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 1976, title: 'Viking Mars Landers', who: 'NASA', description: 'The Viking 1 and 2 probes became the first successful missions to land on Mars and return images and data from the surface.', additionalDetails: 'The Viking missions were designed to search for signs of life, but their findings were inconclusive. They did, however, provide invaluable data about the Martian atmosphere and soil.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 1977, title: 'Voyager Golden Record', who: 'Carl Sagan and NASA', description: 'Launched the Voyager 1 and 2 probes, each carrying a golden record with sounds and images to tell the story of Earth to any potential extraterrestrial life.', additionalDetails: 'The record includes greetings in 55 languages, music from various cultures, and sounds from nature, such as birds and whales. Voyager 1 is now in interstellar space.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 1981, title: 'First Space Shuttle Flight', who: 'NASA (Columbia)', description: 'The Space Shuttle Columbia successfully completed its first orbital flight, demonstrating a reusable spacecraft.', additionalDetails: 'The shuttle system was designed to make space travel more routine and cost-effective. It was a complex and ambitious engineering project that became a workhorse for decades.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 1986, title: 'Challenger Disaster', who: 'NASA', description: 'The Space Shuttle Challenger disintegrated 73 seconds after launch, killing all seven crew members. This was a major setback for the US space program.', additionalDetails: 'The disaster was caused by the failure of an O-ring seal in one of the solid rocket boosters. The tragedy led to a two-and-a-half-year suspension of the Space Shuttle program.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 1990, title: 'Hubble Space Telescope', who: 'NASA & ESA', description: 'Launched into orbit, providing stunningly clear images of the universe and revolutionizing astronomy.', additionalDetails: 'Initially, the telescope had a flaw in its mirror, but a repair mission in 1993 fixed the issue. Since then, Hubble has produced groundbreaking discoveries and iconic images.', country: 'USA & Europe', flag: '🇺🇸🇪🇺', theme: 'Telescopes & Observation' },
+            { year: 1995, title: 'First Exoplanet', who: 'Michel Mayor & Didier Queloz', description: 'Discovered the first planet orbiting a Sun-like star outside our solar system, 51 Pegasi b.', additionalDetails: 'Their discovery opened up a new field of astronomy and earned them the Nobel Prize in Physics in 2019. It proved that planets orbiting other stars are common.', country: 'Switzerland', flag: '🇨🇭', theme: 'Planetary Science' },
+            { year: 1997, title: 'Mars Pathfinder', who: 'NASA', description: 'The first successful robotic mission to land on Mars in over 20 years, deploying the Sojourner rover to explore the planet\'s surface.', additionalDetails: 'Pathfinder was a low-cost mission that captured the public\'s imagination with its high-quality images and innovative landing system, which used airbags to cushion the impact.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 1998, title: 'ISS Begins Construction', who: 'International Partners', description: 'The first module of the International Space Station (ISS), Zarya, was launched, marking the beginning of the largest-ever collaboration in space.', additionalDetails: 'The ISS is a joint project involving multiple countries and serves as a microgravity and space environment research laboratory, where crews conduct experiments in various fields.', country: 'International', flag: '🌐', theme: 'Space Exploration' },
+            { year: 2003, title: 'Mars Exploration Rovers', who: 'NASA (Spirit & Opportunity)', description: 'The rovers Spirit and Opportunity landed on Mars to search for evidence of past water activity.', additionalDetails: 'Both rovers far exceeded their planned mission lengths, with Opportunity operating for over 14 years. Their discoveries provided strong evidence that Mars once had liquid water on its surface.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 2004, title: 'Evidence for Dark Energy', who: 'Various research teams', description: 'Astronomers found compelling evidence for the existence of dark energy, a mysterious force accelerating the expansion of the universe.', additionalDetails: 'This discovery was based on observations of distant supernovae and led to the current understanding of our universe as a composition of normal matter, dark matter, and dark energy.', country: 'International', flag: '🌐', theme: 'Cosmology & Physics' },
+            { year: 2006, title: 'Pluto Demoted', who: 'International Astronomical Union (IAU)', description: 'Reclassified Pluto as a "dwarf planet," due to the discovery of other similar objects in the outer solar system.', additionalDetails: 'The decision was highly controversial, but the IAU defined a planet as a celestial body that has "cleared the neighborhood" around its orbit, which Pluto has not done.', country: 'International', flag: '🌐', theme: 'Planetary Science' },
+            { year: 2006, title: 'New Horizons to Pluto', who: 'NASA', description: 'The New Horizons probe was launched on a mission to study Pluto and its moons, as well as other objects in the Kuiper Belt.', additionalDetails: 'It was the first mission to visit Pluto, providing detailed, high-resolution images and data that revolutionized our understanding of the dwarf planet.', country: 'USA', flag: '🇺🇸', theme: 'Planetary Science' },
+            { year: 2012, title: 'Curiosity Rover Landing', who: 'NASA', description: 'The Curiosity rover successfully landed on Mars, beginning its mission to search for signs of ancient microbial life.', additionalDetails: 'Curiosity\'s landing was a complex maneuver known as the "seven minutes of terror." It has since confirmed that Mars once had the conditions to support life.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 2014, title: 'Rosetta Comet Landing', who: 'ESA (Rosetta)', description: 'The Rosetta spacecraft successfully deployed its Philae lander onto the surface of a comet, marking a first in space history.', additionalDetails: 'The mission provided a close-up look at a comet and its composition, helping scientists understand the origins of water and organic molecules in our solar system.', country: 'Europe', flag: '🇪🇺', theme: 'Planetary Science' },
+            { year: 2015, title: 'Falcon 9 First Landing', who: 'SpaceX', description: 'SpaceX successfully landed the first stage of its Falcon 9 rocket back on Earth, a major step toward reusable rockets.', additionalDetails: 'This achievement was a game-changer for the space industry, promising to drastically reduce the cost of space travel by making launch vehicles reusable.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 2015, title: 'Gravitational Waves', who: 'LIGO Scientific Collaboration', description: 'Detected the first gravitational waves from a black hole merger, confirming a major prediction of Einstein\'s General Theory of Relativity.', additionalDetails: 'This discovery opened a new window for observing the universe, allowing scientists to "hear" the cosmos and study black holes and other extreme astronomical events.', country: 'USA', flag: '🇺🇸', theme: 'Cosmology & Physics' },
+            { year: 2019, title: 'First Image of a Black Hole', who: 'Event Horizon Telescope Collaboration', description: 'Captured the first image of a black hole and its shadow, located in the center of the galaxy Messier 87.', additionalDetails: 'The image was a monumental achievement, made possible by linking a network of telescopes around the world to create an Earth-sized virtual telescope.', country: 'International', flag: '🌐', theme: 'Telescopes & Observation' },
+            { year: 2020, title: 'First Commercial Crewed Flight', who: 'SpaceX & NASA', description: 'SpaceX launched the Crew Dragon spacecraft carrying NASA astronauts, the first crewed flight from the U.S. since the retirement of the Space Shuttle.', additionalDetails: 'This mission marked a new era of commercial crew transportation to the ISS and restored American human spaceflight capability.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+            { year: 2021, title: 'James Webb Space Telescope', who: 'NASA, ESA, & CSA', description: 'The most powerful space telescope ever built was launched, designed to observe the universe in infrared light.', additionalDetails: 'The Webb telescope is designed to look back in time to the first galaxies that formed after the Big Bang. Its first images have revealed a universe of stunning detail and beauty.', country: 'International', flag: '🌐', theme: 'Telescopes & Observation' },
+            { year: 2021, title: 'Perseverance Rover on Mars', who: 'NASA', description: 'The Perseverance rover successfully landed on Mars to seek signs of ancient life and collect rock and soil samples for a future return mission.', additionalDetails: 'The rover carries the Ingenuity helicopter, the first powered aircraft to fly on another planet, proving aerial exploration is possible on Mars.', country: 'USA', flag: '🇺🇸', theme: 'Space Exploration' },
+            { year: 2022, title: 'DART Mission', who: 'NASA', description: 'Successfully tested a planetary defense method by intentionally crashing a spacecraft into an asteroid to alter its orbit.', additionalDetails: 'The Double Asteroid Redirection Test (DART) mission was the first full-scale demonstration of asteroid deflection technology, a key step in protecting Earth from a potential future impact.', country: 'USA', flag: '🇺🇸', theme: 'Planetary Science' },
+            { year: 2022, title: 'Artemis I Launch', who: 'NASA', description: 'The uncrewed Artemis I mission successfully launched the Orion spacecraft to the Moon, testing the rocket and capsule for future crewed missions.', additionalDetails: 'Artemis I was the first step in NASA\'s program to return humans to the Moon and establish a long-term presence there.', country: 'USA', flag: '🇺🇸', theme: 'Astronauts & Missions' },
+        ];
+        
+        const goButton = document.getElementById('goButton');
+        const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton');
+        const timelineButton = document.getElementById('timelineButton');
+        const discoveriesButton = document.getElementById('discoveriesButton');
+        const exploreButton = document.getElementById('exploreButton');
+        const yearDisplay = document.getElementById('yearDisplay');
+        const timeMachine = document.querySelector('.time-machine');
+        const postcardsContainer = document.getElementById('postcardsContainer');
+        const noPostcards = document.getElementById('noPostcards');
+        const levelDisplay = document.getElementById('levelDisplay');
+        
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalEvent = document.getElementById('modalEvent');
+        const modalWho = document.getElementById('modalWho');
+        const modalWhen = document.getElementById('modalWhen');
+        const modalWhere = document.getElementById('modalWhere');
+        const modalTheme = document.getElementById('modalTheme');
+        const closeModalButton = document.getElementById('closeModal');
+        const moreDetailsBtn = document.getElementById('moreDetailsBtn');
+        const additionalDetailsDiv = document.getElementById('additionalDetails');
+        
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmResetButton = document.getElementById('confirmResetButton');
+        const cancelResetButton = document.getElementById('cancelResetButton');
+
+        const timelineModal = document.getElementById('timelineModal');
+        const closeTimelineButton = document.getElementById('closeTimeline');
+        const timelineContainer = document.getElementById('timelineContainer');
+        
+        const discoveriesModal = document.getElementById('discoveriesModal');
+        const totalDiscoveries = document.getElementById('totalDiscoveries');
+        const themeCounters = document.getElementById('themeCounters');
+        const closeDiscoveriesButton = document.getElementById('closeDiscoveries');
+
+        let visitedEvents = new Set();
+        let isAnimating = false;
+        let animationInterval;
+        let selectedEvent = null;
+
+        const levels = {
+            'Level One': { min: 0, max: 10 },
+            'Level Two': { min: 11, max: 25 },
+            'Level Three': { min: 26, max: 40 },
+            'Level Four': { min: 41, max: 50 },
+        };
+
+        function getLevelName(count) {
+            if (count >= levels['Level Four'].min) return 'Level Four';
+            if (count >= levels['Level Three'].min) return 'Level Three';
+            if (count >= levels['Level Two'].min) return 'Level Two';
+            return 'Level One';
+        }
+
+        function updateDiscoveriesInfo() {
+            const count = visitedEvents.size;
+            levelDisplay.textContent = `Level: ${getLevelName(count)}`;
+        }
+
+        function savePostcards() {
+            localStorage.setItem('cosmicTimeMachinePostcards', JSON.stringify([...visitedEvents]));
+        }
+
+        function loadPostcards() {
+            const savedPostcards = localStorage.getItem('cosmicTimeMachinePostcards');
+            if (savedPostcards) {
+                const postcardIndexes = JSON.parse(savedPostcards);
+                visitedEvents = new Set(postcardIndexes);
+                
+                if (postcardIndexes.length > 0) {
+                    const noPostcardsElement = document.getElementById('noPostcards');
+                    if (noPostcardsElement) {
+                        noPostcardsElement.remove();
+                    }
+                    timelineButton.classList.remove('hidden');
+                    renderPostcards([...visitedEvents].map(index => events[index]));
+                }
+            }
+            updateDiscoveriesInfo();
+        }
+
+        function setThemeColor(themeName) {
+            const body = document.body;
+            for (const key in themes) {
+                body.classList.remove(themes[key].color);
+            }
+            if (themes[themeName]) {
+                body.classList.add(themes[themeName].color);
+            } else {
+                body.classList.add('bg-gray-900');
+            }
+        }
+
+        function renderPostcards(postcardEvents) {
+            postcardsContainer.innerHTML = '';
+            if (postcardEvents.length === 0) {
+                const noPostcardsParagraph = document.createElement('p');
+                noPostcardsParagraph.id = 'noPostcards';
+                noPostcardsParagraph.classList.add('text-gray-400', 'italic');
+                noPostcardsParagraph.textContent = 'No journeys yet. Press \'GO\' to collect your first postcard!';
+                postcardsContainer.appendChild(noPostcardsParagraph);
+                timelineButton.classList.add('hidden');
+                return;
+            }
+
+            postcardEvents.forEach(event => {
+                const postcard = document.createElement('div');
+                postcard.classList.add('p-3', 'bg-gray-700', 'rounded-xl', 'shadow-md', 'cursor-pointer', 'hover:bg-gray-600', 'transition', 'duration-200', 'text-gray-200', 'relative');
+                postcard.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <p class="font-bold text-gray-100">${event.title}</p>
+                        <div class="w-3 h-3 rounded-full ${themes[event.theme]?.color || 'bg-gray-500'}"></div>
+                    </div>
+                    <p class="text-sm text-gray-300">${event.year} ${event.flag}</p>
+                `;
+                postcard.onclick = () => showModal(event);
+                postcardsContainer.appendChild(postcard);
+            });
+            updateDiscoveriesInfo();
+        }
+
+        function showModal(event) {
+            modalTitle.textContent = event.title;
+            modalEvent.textContent = event.description;
+            modalWho.textContent = `Who: ${event.who}`;
+            modalWhen.textContent = `When: ${event.year}`;
+            modalWhere.textContent = `Where: ${event.country} ${event.flag}`;
+            modalTheme.textContent = `Theme: ${themes[event.theme]?.name || 'Unknown'}`;
+            modalTheme.classList.add(themes[event.theme]?.color || 'bg-gray-500', 'inline-block', 'px-2', 'py-1', 'rounded-full');
+            
+            additionalDetailsDiv.textContent = event.additionalDetails;
+            additionalDetailsDiv.classList.add('hidden');
+            moreDetailsBtn.textContent = 'See More Details';
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function hideModal(modalElement) {
+            modalElement.classList.add('hidden');
+            if (modalElement === modal) {
+                modalTheme.classList.remove(...Object.values(themes).map(t => t.color), 'inline-block', 'px-2', 'py-1', 'rounded-full');
+            }
+        }
+        
+        function renderTimeline() {
+            const collectedEvents = [...visitedEvents].map(index => events[index]).sort((a, b) => a.year - b.year);
+            timelineContainer.innerHTML = '';
+
+            if (collectedEvents.length === 0) {
+                timelineContainer.innerHTML = `<p class="text-center text-gray-400 italic">No events to display on the timeline.</p>`;
+                return;
+            }
+
+            collectedEvents.forEach((event, index) => {
+                const item = document.createElement('div');
+                item.classList.add('timeline-item', index % 2 === 0 ? 'left' : 'right');
+                item.innerHTML = `
+                    <div class="timeline-content ${themes[event.theme]?.color || 'bg-gray-700'}">
+                        <h4 class="text-xl font-bold mb-1">${event.year} ${event.flag}</h4>
+                        <h5 class="font-semibold text-lg text-white">${event.title}</h5>
+                        <p class="text-sm text-gray-300">by ${event.who}</p>
+                    </div>
+                `;
+                timelineContainer.appendChild(item);
+            });
+            timelineModal.classList.remove('hidden');
+        }
+
+        function showDiscoveriesModal() {
+            const count = visitedEvents.size;
+            totalDiscoveries.textContent = `Total Discoveries: ${count} / ${events.length}`;
+
+            themeCounters.innerHTML = '';
+            const themeCounts = {};
+            for (const key in themes) {
+                themeCounts[key] = 0;
+            }
+
+            [...visitedEvents].forEach(index => {
+                const theme = events[index].theme;
+                if (theme in themeCounts) {
+                    themeCounts[theme]++;
+                }
+            });
+
+            for (const themeName in themeCounts) {
+                const themeCountDiv = document.createElement('div');
+                themeCountDiv.classList.add('flex', 'justify-between', 'items-center', 'py-1', 'px-2', 'rounded');
+                themeCountDiv.innerHTML = `
+                    <span class="font-bold">${themeName}</span>
+                    <span class="text-white bg-gray-600 px-3 py-1 rounded-full text-sm">${themeCounts[themeName]}</span>
+                `;
+                themeCounters.appendChild(themeCountDiv);
+            }
+            
+            discoveriesModal.classList.remove('hidden');
+        }
+
+        goButton.addEventListener('click', () => {
+            if (isAnimating || visitedEvents.size >= events.length) return;
+            isAnimating = true;
+
+            setThemeColor('Default');
+
+            timeMachine.classList.add('shake');
+            goButton.disabled = true;
+            stopButton.disabled = false;
+            exploreButton.classList.add('hidden');
+            selectedEvent = null;
+
+            animationInterval = setInterval(() => {
+                yearDisplay.textContent = Math.floor(Math.random() * (2025 - (-1000) + 1)) + (-1000);
+            }, 50);
+        });
+
+        stopButton.addEventListener('click', () => {
+            clearInterval(animationInterval);
+            timeMachine.classList.remove('shake');
+            
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * events.length);
+            } while (visitedEvents.has(randomIndex) && visitedEvents.size < events.length);
+
+            if (visitedEvents.size < events.length) {
+                visitedEvents.add(randomIndex);
+                selectedEvent = events[randomIndex];
+                yearDisplay.textContent = selectedEvent.year;
+                
+                setThemeColor(selectedEvent.theme);
+                
+                renderPostcards([...visitedEvents].map(index => events[index]));
+                savePostcards();
+                exploreButton.classList.remove('hidden');
+                timelineButton.classList.remove('hidden');
+            } else {
+                yearDisplay.textContent = "All collected!";
+                setTimeout(() => yearDisplay.textContent = "2025", 2000);
+                setThemeColor('Default');
+            }
+
+            goButton.disabled = false;
+            stopButton.disabled = true;
+            isAnimating = false;
+        });
+        
+        exploreButton.addEventListener('click', () => {
+            if (selectedEvent) {
+                showModal(selectedEvent);
+            }
+        });
+
+        timelineButton.addEventListener('click', () => {
+            renderTimeline();
+        });
+
+        discoveriesButton.addEventListener('click', () => {
+            showDiscoveriesModal();
+        });
+
+        resetButton.addEventListener('click', () => {
+            confirmModal.classList.remove('hidden');
+        });
+
+        confirmResetButton.addEventListener('click', () => {
+            visitedEvents.clear();
+            yearDisplay.textContent = "2025";
+            localStorage.removeItem('cosmicTimeMachinePostcards');
+            renderPostcards([]);
+            hideModal(confirmModal);
+            exploreButton.classList.add('hidden');
+            setThemeColor('Default');
+        });
+        
+        cancelResetButton.addEventListener('click', () => {
+            hideModal(confirmModal);
+        });
+
+        moreDetailsBtn.addEventListener('click', () => {
+            if (additionalDetailsDiv.classList.contains('hidden')) {
+                additionalDetailsDiv.classList.remove('hidden');
+                moreDetailsBtn.textContent = 'Hide Details';
+            } else {
+                additionalDetailsDiv.classList.add('hidden');
+                moreDetailsBtn.textContent = 'See More Details';
+            }
+        });
+
+        closeModalButton.addEventListener('click', () => {
+            hideModal(modal);
+        });
+
+        closeTimelineButton.addEventListener('click', () => {
+            hideModal(timelineModal);
+        });
+
+        closeDiscoveriesButton.addEventListener('click', () => {
+            hideModal(discoveriesModal);
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                hideModal(modal);
+            }
+        });
+        
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target.id === 'confirmModal') {
+                hideModal(confirmModal);
+            }
+        });
+        
+        timelineModal.addEventListener('click', (e) => {
+            if (e.target.id === 'timelineModal') {
+                hideModal(timelineModal);
+            }
+        });
+
+        discoveriesModal.addEventListener('click', (e) => {
+            if (e.target.id === 'discoveriesModal') {
+                hideModal(discoveriesModal);
+            }
+        });
+
+        window.onload = loadPostcards;
+    </script>
+
+</body>
+</html>
